@@ -29,7 +29,7 @@ This sample processes queue-based events, demonstrating a common Azure Functions
 
 ## Prerequisites
 
-* [Node.js 18 or later](https://nodejs.org/en/download/)
+* [Node.js 22 or later](https://nodejs.org/en/download/)
 * [TypeScript](https://www.typescriptlang.org/download)
 * [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?tabs=v4%2Clinux%2Ctypescript%2Cportal%2Cbash#install-the-azure-functions-core-tools)
 * To use Visual Studio Code to run and debug locally:
