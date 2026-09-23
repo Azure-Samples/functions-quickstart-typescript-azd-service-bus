@@ -68,7 +68,7 @@ module processor './app/processor.bicep' = {
     applicationInsightsName: monitoring.outputs.name
     appServicePlanId: appServicePlan.outputs.resourceId
     runtimeName: 'node'
-    runtimeVersion: '20'
+    runtimeVersion: '22'
     storageAccountName: storage.outputs.name
     identityId: processorUserAssignedIdentity.outputs.resourceId
     identityClientId: processorUserAssignedIdentity.outputs.clientId
