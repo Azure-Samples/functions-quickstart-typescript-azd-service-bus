@@ -33,9 +33,9 @@ This sample processes queue-based events, demonstrating a common Azure Functions
 * [TypeScript](https://www.typescriptlang.org/download)
 * [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local?tabs=v4%2Clinux%2Ctypescript%2Cportal%2Cbash#install-the-azure-functions-core-tools)
 * To use Visual Studio Code to run and debug locally:
-    * [Visual Studio Code](https://code.visualstudio.com/)
-    * [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
-    * [TypeScript extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-next)
+  * [Visual Studio Code](https://code.visualstudio.com/)
+  * [Azure Functions extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurefunctions)
+  * [TypeScript extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-typescript-next)
 * [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) (for deployment)
 * [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd?tabs=winget-windows%2Cbrew-mac%2Cscript-linux&pivots=os-windows)
 * An Azure subscription with Microsoft.Web and Microsoft.App [registered resource providers](https://learn.microsoft.com/azure/azure-resource-manager/management/resource-providers-and-types#register-resource-provider)
@@ -76,16 +76,16 @@ You can initialize a project from this `azd` template in one of these ways:
     | _Environment name_ | An environment that's used to maintain a unique deployment context for your app. You won't be prompted if you created the local project using `azd init`. |
     | _Azure subscription_ | Subscription in which your resources are created. |
     | _Azure location_ | Azure region in which to create the resource group that contains the new Azure resources. Only regions that currently support the Flex Consumption plan are shown. |
-    | _VNET_ENABLED_ | Whether to deploy with VNet integration and private endpoints. Enter `false` unless you need private networking. |
+    | _vnetEnabled_ | Whether to deploy with VNet integration and private endpoints. Select `False` unless you need private networking. |
 
     This creates all necessary Azure resources including:
     * Azure Service Bus namespace and queue
     * Azure Function App (Flex Consumption)
     * Application Insights for monitoring
     * Storage account for function app
-    * Virtual network with private endpoints (if `VNET_ENABLED=true`)
+    * Virtual network with private endpoints (if `vnetEnabled` is `True`)
 
-    After provisioning completes, a post-provision script automatically generates `src/local.settings.json` with the correct Service Bus connection settings:
+    After provisioning completes, a post-provision script automatically creates or updates `src/local.settings.json` with the correct Service Bus connection settings:
 
     ```json
     {
@@ -115,6 +115,9 @@ You can initialize a project from this `azd` template in one of these ways:
     ```
 
 ## Run your app locally
+
+> [!IMPORTANT]
+> If you selected `True` for `vnetEnabled`, Service Bus public network access is disabled. To run locally, your computer must reach the Service Bus private endpoint through the virtual network (for example, VPN) and resolve the namespace to its private IP address through private DNS. Otherwise, select `False` for local runs.
 
 1. Start the Azurite storage emulator. You can do this using the [Azurite extension](https://marketplace.visualstudio.com/items?itemName=Azurite.azurite) in VS Code or by running `azurite` in a separate terminal.
 

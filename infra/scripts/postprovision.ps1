@@ -2,35 +2,34 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "Running post-provision script..." -ForegroundColor Yellow
 
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+    throw "Node.js is required to update src/local.settings.json."
+}
+
 $outputJson = azd env get-values --output json
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to get environment values from azd."
 }
 
-$outputs = $outputJson | ConvertFrom-Json
-$ServiceBusNamespace = $outputs.SERVICE_BUS_CONNECTION__fullyQualifiedNamespace
-$ServiceBusQueueName = $outputs.SERVICE_BUS_QUEUE_NAME
-
-if ([string]::IsNullOrWhiteSpace($ServiceBusNamespace) -or [string]::IsNullOrWhiteSpace($ServiceBusQueueName)) {
-    throw "Required Service Bus environment values are missing."
-}
-
 Write-Host "Creating/updating src/local.settings.json..." -ForegroundColor Yellow
 
-@{
-    "IsEncrypted" = $false
-    "Values" = @{
-        "AzureWebJobsStorage" = "UseDevelopmentStorage=true"
-        "FUNCTIONS_WORKER_RUNTIME" = "node"
-        "ServiceBusConnection__fullyQualifiedNamespace" = "$ServiceBusNamespace"
-        "ServiceBusQueueName" = "$ServiceBusQueueName"
-    }
-} | ConvertTo-Json | Out-File -FilePath ".\src\local.settings.json" -Encoding utf8 -Force
+# The helper validates the azd output and merges into any existing file so user-added settings are preserved.
+$helper = Join-Path $PSScriptRoot "update-local-settings.mjs"
+$settingsPath = Join-Path "src" "local.settings.json"
+$serviceBusValues = @(($outputJson -join "`n") | node $helper $settingsPath)
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to update $settingsPath."
+}
+$ServiceBusNamespace = $serviceBusValues[0]
+$ServiceBusQueueName = $serviceBusValues[1]
 
 Write-Host "src/local.settings.json has been created/updated successfully!" -ForegroundColor Green
 Write-Host "Creating/updating send-message.ps1..." -ForegroundColor Yellow
 
-"az rest --method POST --uri 'https://$ServiceBusNamespace/$ServiceBusQueueName/messages' --headers 'Content-Type=application/atom+xml;type=entry;charset=utf-8' --body 'Hello from the CLI' --resource 'https://servicebus.azure.net'" | Out-File -FilePath ".\send-message.ps1" -Encoding utf8 -Force
+@"
+az rest --method POST --uri 'https://$ServiceBusNamespace/$ServiceBusQueueName/messages' --headers 'Content-Type=application/atom+xml;type=entry;charset=utf-8' --body 'Hello from the CLI' --resource 'https://servicebus.azure.net'
+exit `$LASTEXITCODE
+"@ | Out-File -FilePath ".\send-message.ps1" -Encoding utf8 -Force
 
 Write-Host "send-message.ps1 has been created successfully!" -ForegroundColor Green
 Write-Host ""
